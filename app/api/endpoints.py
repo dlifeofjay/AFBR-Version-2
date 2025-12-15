@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, HTTPException, Depends, Header
+from fastapi import APIRouter, UploadFile, HTTPException, Depends, Header, Request
 from sqlalchemy.orm import Session
 from datetime import datetime
 import hashlib
@@ -14,12 +14,20 @@ router = APIRouter()
 from fastapi.security import OAuth2PasswordBearer
 import os
 import jwt
+from typing import Optional
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 # ... imports ...
 
-def verify_jwt(token: str = Depends(oauth2_scheme)):
+def verify_jwt(request: Request, token: Optional[str] = Depends(oauth2_scheme)):
+    # Skip auth for OPTIONS (CORS preflight)
+    if request.method == "OPTIONS":
+        return None
+    
+    if not token:
+        raise HTTPException(401, "Missing authentication token")
+    
     try:
         # Supabase JWT Secret should be in .env
         secret = os.getenv("SUPABASE_JWT_SECRET") 
@@ -37,9 +45,13 @@ def verify_jwt(token: str = Depends(oauth2_scheme)):
         raise HTTPException(401, "Invalid token")
 
 def get_or_create_user(
-        token_payload: dict = Depends(verify_jwt),
+        token_payload: Optional[dict] = Depends(verify_jwt),
         db: Session = Depends(get_db)
-) -> User:
+) -> Optional[User]:
+    # If token_payload is None (OPTIONS request), return None
+    if token_payload is None:
+        return None
+    
     email = token_payload.get("email")
     if not email:
         raise HTTPException(400, "Token missing email")
@@ -75,9 +87,13 @@ def check_daily_limit(db: Session, user_id: str) -> bool:
 @router.post("/analyze", response_model=AnalysisResponse)
 async def analyze_file(
     file: UploadFile,
-    user: User = Depends(get_or_create_user),
+    user: Optional[User] = Depends(get_or_create_user),
     db: Session = Depends(get_db),
 ):
+    # Early return for OPTIONS (CORS preflight) - this shouldn't be reached but as safety
+    if user is None:
+        return {}
+    
     if check_daily_limit(db, user.id):
         raise HTTPException(429, "Daily limit reached (1 report per day)")
     
@@ -124,9 +140,13 @@ async def analyze_file(
 @router.get("/report/{report_id}", response_model=AnalysisResponse)
 async def get_report(
     report_id: str,
-    user: User = Depends(get_or_create_user),
+    user: Optional[User] = Depends(get_or_create_user),
     db: Session = Depends(get_db),
 ):
+    # Early return for OPTIONS (shouldn't reach here but as safety)
+    if user is None:
+        return {}
+    
     report = db.query(Report).filter(Report.id == report_id, Report.user_id == user.id).first()
     if not report:
         raise HTTPException(404, "Report not found")
