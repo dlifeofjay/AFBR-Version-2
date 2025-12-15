@@ -16,7 +16,8 @@ if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set")
 
 # fast_executemany is good for bulk inserts
-engine = create_engine(DATABASE_URL, fast_executemany=True)
+# fast_executemany is only for MSSQL, removing for Postgres compatibility
+engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
 
