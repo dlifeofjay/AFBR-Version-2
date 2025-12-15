@@ -1,0 +1,52 @@
+# Environments
+.env
+.env.*
+!.env.example
+venv/
+env/
+__pycache__/
+
+# IDEs
+.vscode/
+.idea/
+
+# Database
+*.sqlite3
+*.db
+
+# Helper Scripts & Logs
+*.log
+launch.ps1
+setup_local.ps1
+# We might want to keep the scripts if they are generic, but sometimes they hardcode paths. 
+# The user's scripts seemed generic enough, but safe to ignore if they become user-specific.
+# Actually, the user asked to push, so maybe we SHOULD keep the launch scripts if they are useful for others?
+# I'll keep them UN-ignored unless requested otherwise, but definitely verify .env is ignored.
+# Re-writing the list to be standard python.
+
+# Python
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# OS
+.DS_Store
+Thumbs.db
