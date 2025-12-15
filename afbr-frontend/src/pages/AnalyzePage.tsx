@@ -7,7 +7,6 @@ import {
   TrendingUp,
   Package,
   Users,
-  DollarSign,
   FileText,
   AlertCircle,
   CheckCircle,
@@ -329,7 +328,7 @@ export default function EcommerceAnalyzer() {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                     <XAxis dataKey="name" stroke="#cbd5e1" fontSize={12} tickFormatter={(val) => val.slice(5)} />
-                    <YAxis stroke="#cbd5e1" fontSize={12} tickFormatter={(val) => `$${val / 1000}k`} />
+                    <YAxis stroke="#cbd5e1" fontSize={12} tickFormatter={(val) => `${val / 1000}k`} />
                     <Tooltip
                       contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
                       itemStyle={{ color: '#fff' }}
