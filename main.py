@@ -48,6 +48,17 @@ async def health():
     from datetime import datetime
     return {"status": "ok", "time": datetime.utcnow()}
 
+@app.get("/debug-env")
+async def debug_env():
+    """Temporary debug endpoint - DELETE AFTER TESTING"""
+    import os
+    return {
+        "has_jwt_secret": bool(os.getenv("SUPABASE_JWT_SECRET")),
+        "jwt_secret_length": len(os.getenv("SUPABASE_JWT_SECRET", "")),
+        "has_database_url": bool(os.getenv("DATABASE_URL")),
+        "has_openai_key": bool(os.getenv("OPENAI_API_KEY"))
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
