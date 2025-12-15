@@ -13,7 +13,13 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AI For Business Report", version="2.0")
 
-origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+# CORS Configuration - Include production frontend URL
+# Set CORS_ORIGINS environment variable on Render to override
+cors_origins_env = os.getenv(
+    "CORS_ORIGINS", 
+    "https://afbr-version-2.vercel.app,http://localhost:3000"
+)
+origins = [origin.strip() for origin in cors_origins_env.split(",")]
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,6 +30,18 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api")
+
+@app.get("/")
+async def root():
+    return {
+        "message": "AI For Business Report API",
+        "version": "2.0",
+        "endpoints": {
+            "health": "/health",
+            "docs": "/docs",
+            "api": "/api"
+        }
+    }
 
 @app.get("/health")
 async def health():
