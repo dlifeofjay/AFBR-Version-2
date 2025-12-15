@@ -8,7 +8,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def get_client():
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY is not set in environment variables")
+    return OpenAI(api_key=api_key)
 
 async def map_columns_ai(headers: List[str]) -> Tuple[str, Dict]:
     prompt = f"""
@@ -25,6 +30,7 @@ async def map_columns_ai(headers: List[str]) -> Tuple[str, Dict]:
     }}
     """
     
+    client = get_client()
     response = client.chat.completions.create(
         model="gpt-4o-mini", # Improved model if available, or fallback to 4.1-mini alias
         messages=[{"role": "user", "content": prompt}],
@@ -126,6 +132,7 @@ async def analyze_data_ai(df: pd.DataFrame, mapping: Dict) -> Dict:
     }}
     """
 
+    client = get_client()
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
